@@ -2,8 +2,9 @@
 # 路径: /etc/profile.d/welcome.sh
 # 授权: chmod +x /etc/profile.d/welcome.sh
 # 只在交互终端显示
-[ -z "$PS1" ] && return
+[ -n "$BASH_VERSION" ] || return 0
 
+#颜色
 export TERM=xterm-256color
 
 G=$'\033[1;32m'
