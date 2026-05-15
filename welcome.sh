@@ -1,13 +1,8 @@
 #!/bin/bash
 # 路径：/etc/profile.d/welcome.sh
 # 授权：chmod +x /etc/profile.d/welcome.sh
-# 开启你的脚本：chmod 755 /etc/profile.d/welcome.sh
-#              source /etc/profile
-# 关闭系统欢迎词：> /etc/motd
-#               chmod -x /etc/update-motd.d/*
-#
 
-# 或者直接替换：/etc/motd  里面的内容 这样最简单
+[ -z "$PS1" ] && return
 
 export TERM=xterm-256color
 
@@ -49,7 +44,8 @@ detect_http() {
 
 
 # ===== 入站 =====
-IPV4_IN="216.167.28.38"
+# IPV4_IN="216.167.28.38" 可以固定
+IPV4_IN=$(curl -4 -s --max-time 1 ifconfig.me)   
 IPV6_IN=$(curl -6 -s --max-time 1 ifconfig.me 2>/dev/null)
 
 # ===== 出站 =====
@@ -65,35 +61,119 @@ else
 fi
 
 # ===== 地区 =====
-CITY=$(curl -s --max-time 1 ipinfo.io/city)
-COUNTRY=$(curl -s --max-time 1 ipinfo.io/country)
+# ===== 区域 + 运营商 + ASN =====
 
-case "$COUNTRY" in
-    US) COUNTRY_CN="美国";;
-    DE) COUNTRY_CN="德国";;
-    HK) COUNTRY_CN="香港";;
-    SG) COUNTRY_CN="新加坡";;
-    JP) COUNTRY_CN="日本";;
-    *) COUNTRY_CN="$COUNTRY";;
-esac
+IP_INFO=$(curl -s --max-time 2 ipinfo.io/json)
 
-case "$CITY" in
-    "Los Angeles") CITY_CN="洛杉矶";;
-    "Tokyo") CITY_CN="东京";;
-    "Singapore") CITY_CN="新加坡";;
-    "Hong Kong") CITY_CN="香港";;
-    "Frankfurt") CITY_CN="法兰克福";;
-    *) CITY_CN="$CITY";;
-esac
+CITY=$(echo "$IP_INFO" | grep '"city"' | sed -E 's/.*"city": ?"([^"]+)".*/\1/')
+COUNTRY=$(echo "$IP_INFO" | grep '"country"' | sed -E 's/.*"country": ?"([^"]+)".*/\1/')
+ORG=$(echo "$IP_INFO" | grep '"org"' | sed -E 's/.*"org": ?"([^"]+)".*/\1/')
+
+ASN=$(echo "$ORG" | awk '{print $1}')
+ISP=$(echo "$ORG" | cut -d' ' -f2-)
+
+# ===== 国家中文 + 国旗 =====
+get_country_cn() {
+    case "$1" in
+        US) echo "🇺🇸 美国";;
+        DE) echo "🇩🇪 德国";;
+        HK) echo "🇭🇰 香港";;
+        SG) echo "🇸🇬 新加坡";;
+        JP) echo "🇯🇵 日本";;
+        KR) echo "🇰🇷 韩国";;
+        FI) echo "🇫🇮 芬兰";;
+        NL) echo "🇳🇱 荷兰";;
+        GB) echo "🇬🇧 英国";;
+        FR) echo "🇫🇷 法国";;
+        CA) echo "🇨🇦 加拿大";;
+        AU) echo "🇦🇺 澳大利亚";;
+        RU) echo "🇷🇺 俄罗斯";;
+        IN) echo "🇮🇳 印度";;
+        BR) echo "🇧🇷 巴西";;
+        *) echo "$1";;
+    esac
+}
+
+# ===== 城市中文 =====
+get_city_cn() {
+    case "$1" in
+        "Los Angeles") echo "洛杉矶";;
+        "Tokyo") echo "东京";;
+        "Singapore") echo "新加坡";;
+        "Hong Kong") echo "香港";;
+        "Frankfurt") echo "法兰克福";;
+        "Helsinki") echo "赫尔辛基";;
+        "Amsterdam") echo "阿姆斯特丹";;
+        "London") echo "伦敦";;
+        "Paris") echo "巴黎";;
+        "Seoul") echo "首尔";;
+        "Toronto") echo "多伦多";;
+        "Sydney") echo "悉尼";;
+        *) echo "$1";;
+    esac
+}
+
+COUNTRY_CN=$(get_country_cn "$COUNTRY")
+CITY_CN=$(get_city_cn "$CITY")
 
 LOCATION="${COUNTRY_CN}·${CITY_CN}"
+ISP_INFO="${ISP}（${ASN}）"
+
+# ===== ASN线路识别（精准版） =====
+
+LINE_TYPE="普通国际线路"
+CN2="❌"
+C4837="❌"
+C9929="❌"
+
+case "$ASN" in
+    AS4134|4134|AS4809|4809)
+        LINE_TYPE="电信线路"
+        ;;
+    AS4837|4837)
+        LINE_TYPE="电信4837"
+        C4837="✅"
+        ;;
+    AS9929|9929)
+        LINE_TYPE="联通精品网"
+        C9929="✅"
+        ;;
+esac
+
+# ===== traceroute线路分析 =====
+
+TRACE_INFO=""
+
+echo "$TRACE" | grep -q "59.43" && CN2="✅" && TRACE_INFO="CN2线路"
+echo "$TRACE" | grep -q "202.97" && TRACE_INFO="163线路"
+echo "$TRACE" | grep -q "218.105" && C4837="✅"
+echo "$TRACE" | grep -q "210.51" && C9929="✅"
+
+# ===== 回程路径分析 =====
+
+BACK_ROUTE="直连"
+
+echo "$TRACE" | grep -q "JP" && BACK_ROUTE="经日本中转"
+echo "$TRACE" | grep -q "HK" && BACK_ROUTE="经香港中转"
+echo "$TRACE" | grep -q "US" && BACK_ROUTE="经美国中转"
+
+
+# ===== CN2细分识别 =====
+
+CN2_TYPE="无"
+
+echo "$TRACE" | grep -q "59.43" && CN2="✅" && CN2_TYPE="CN2线路"
+
+# 简单区分 GT / GIA（参考判断）
+echo "$TRACE" | grep -q "59.43" && echo "$TRACE" | grep -q "202.97" && CN2_TYPE="CN2 GT"
+echo "$TRACE" | grep -q "59.43" && ! echo "$TRACE" | grep -q "202.97" && CN2_TYPE="CN2 GIA"
+
 
 # ===== 系统 =====
 DISK=$(df -h / | awk 'NR==2 {print $5}')
 MEM=$(free | awk '/Mem/ {printf("%.0f%%"), $3/$2 * 100.0}')
 LOAD=$(uptime | awk -F'load average:' '{print $2}')
 
-# ===== 延迟智能判断版（最终稳定版）=====# ===== 延 V6_STATUS="${G}真实线路${N}"
 # ===== 延迟智能判断版（最终稳定版）=====
 
 # ===== v4 =====
@@ -176,22 +256,52 @@ else
     RISK="${Y}🟡一般${N}"
 fi
 
-# ===== 解锁 =====
-YT=$(curl -s --max-time 2 https://www.youtube.com | grep youtube >/dev/null && echo 1 || echo 0)
-NF=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 https://www.netflix.com/title/80018499)
-GPT=$(curl -s --max-time 2 https://chat.openai.com | grep OpenAI >/dev/null && echo 1 || echo 0)
+# ===== 流媒体 & AI 检测（终极版） =====
 
+# ===== YouTube =====
+YT=$(curl -s --max-time 2 https://www.youtube.com | grep -q "youtube" && echo 1 || echo 0)
 [ "$YT" = "1" ] && YT_ICON="${G}✅${N}" || YT_ICON="${R}❌${N}"
 
-if [ "$NF" = "200" ]; then
-    NF_ICON="${G}✅${N}"
-elif [ "$NF" = "403" ]; then
-    NF_ICON="${Y}🟡${N}"
+# ===== Netflix（地区 + 解锁类型） =====
+NF_PAGE=$(curl -s --max-time 3 https://www.netflix.com/title/80018499 -H "Accept-Language: en")
+
+NF_REGION=$(echo "$NF_PAGE" | grep -o 'preferredLocale":"[a-zA-Z-]*' | cut -d'"' -f3)
+
+if echo "$NF_PAGE" | grep -q "Not Available"; then
+    NF_RESULT="${R}❌ 不支持${N}"
+elif [ -n "$NF_REGION" ]; then
+    if echo "$NF_PAGE" | grep -q "is not available"; then
+        NF_RESULT="${Y}🟡 仅自制 (${NF_REGION})${N}"
+    else
+        NF_RESULT="${G}✅ 完整解锁 (${NF_REGION})${N}"
+    fi
 else
-    NF_ICON="${R}❌${N}"
+    NF_RESULT="${R}❌ 不可用${N}"
 fi
 
-[ "$GPT" = "1" ] && GPT_ICON="${G}✅${N}" || GPT_ICON="${R}❌${N}"
+# ===== ChatGPT（API检测✅）=====
+GPT_STATUS=$(curl -s --max-time 3 https://api.openai.com/v1/models)
+
+echo "$GPT_STATUS" | grep -q "error" && GPT_ICON="${R}❌${N}" || GPT_ICON="${G}✅${N}"
+
+# ===== Disney+ =====
+DISNEY_REGION=$(curl -s --max-time 3 https://www.disneyplus.com/ | grep -o 'region=[a-zA-Z]*' | cut -d'=' -f2)
+
+if [ -n "$DISNEY_REGION" ]; then
+    DISNEY_RESULT="${G}✅ ${DISNEY_REGION}${N}"
+else
+    DISNEY_RESULT="${R}❌${N}"
+fi
+
+# ===== TikTok =====
+TIKTOK_REGION=$(curl -s --max-time 3 https://www.tiktok.com/ | grep -o '"region":"[A-Z]*"' | head -1 | cut -d'"' -f4)
+
+if [ -n "$TIKTOK_REGION" ]; then
+    TIKTOK_RESULT="${G}✅ ${TIKTOK_REGION}${N}"
+else
+    TIKTOK_RESULT="${R}❌${N}"
+fi
+
 
 # ===== Docker =====
 DOCKER_LIST=$(docker ps -a --format "{{.Names}} {{.State}}" 2>/dev/null)
@@ -219,23 +329,32 @@ done <<< "$DOCKER_LIST"
 # ===== 输出 =====
 # 🔐 SSH:28820 │ 🔐 端口范围:28820 手改以免小鸡端口记不住范围
 
-echo -e "${C}══════════ 🌐 Zam-F佬 美家宽══════════${N}"
+echo -e "${C}════════════════════════ 🌐 Zam-F佬 美家宽 ════════════════════════${N}"
+echo -e "📍 位置: $LOCATION │ 运营商: $ISP_INFO"
 
-echo -e "📥 入口: IPv4 $IPV4_IN │ IPv6 $IPV6_IN │ 🔐 SSH:28820 │ 🔐 端口范围:28820"  
-echo -e "📤 出口: IPv4 $IPV4_OUT │ IPv6 $IPV6_OUT │ 📍 $LOCATION"
-echo -e "🚦 出口协议: $PREFER"
+echo -e "${C}────────── 出入信息 ──────────${N}"
+echo -e "📥 入口: IPv4 $IPV4_IN │ IPv6 $IPV6_IN │ 🔐 SSH:22 │ 🔐 端口范围:全端口"  
+echo -e "📤 出口: IPv4 $IPV4_OUT │ IPv6 $IPV6_OUT │ 🚦 出口协议: $PREFER"
 
+echo -e "${C}────────── 网络线路 ──────────${N}"
+echo -e "📡 线路类型: $LINE_TYPE │ 🌍 回程路径: $BACK_ROUTE"
+echo -e "🔍 路径识别: $CN2_TYPE │ 4837:$C4837 │ 9929:$C9929"
+
+echo -e "${C}────────── 性能测试 ──────────${N}"
 echo -e "💾 磁盘使用:$DISK │ 🧠 内存使用:$MEM │ ⚡ 系统负载:$LOAD"
-
 echo -e "📶 延迟: v4 ${G}${PING_V4}ms${N}(${V4_TYPE}) │ v6 ${C}${PING_V6}ms${N}(${V6_TYPE})"
 echo -e "🌐 Google访问: ${Y}${GOOGLE_MS}ms${N}"
 
+echo -e "${C}────────── 质量评估 ──────────${N}"
 echo -e "📡 状态: v4 $V4_STATUS │ v6 $V6_STATUS │ 📊 评分: v4=$SCORE_V4 │ v6=$SCORE_V6 │ ★综合:$FINAL"
-
 echo -e "🧠 风控: $RISK │ 🛡️ 网络: 正常 ✅"
 
-echo -e "🎬 解锁情况: YouTube $YT_ICON │ Netflix $NF_ICON │ ChatGPT $GPT_ICON │ Google ✅"
+echo -e "${C}────────── 解锁情况 ──────────${N}"
+echo -e "🎬 解锁情况:油管 $YT_ICON │ 奈飞 $NF_RESULT │ Disney+ $DISNEY_RESULT │ TikTok $TIKTOK_RESULT │ ChatGPT $GPT_ICON │ Google ✅"
 
-echo -e "🐳 容器: $DOCKER_STATUS"
+echo -e "${C}────────── 系统服务 ──────────${N}"
+echo -e "🐳 DOCKER容器: $DOCKER_STATUS"
 
-echo -e "${C}══════════════════════════════════════${N}"
+echo -e "${C}═══════════════════════ 美家宽 ═════════════════════════${N}"
+
+
