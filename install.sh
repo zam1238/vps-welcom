@@ -29,7 +29,7 @@ fi
 chmod 755 /etc/profile.d/welcome.sh
 
 # ==== 4. 设置自动执行 ====
-grep -q welcome.sh /etc/profile || echo "/etc/profile.d/welcome.sh" >> /etc/profile
+grep -q welcome.sh /etc/profile || echo "source /etc/profile.d/welcome.sh" >> /etc/profile
 grep -q welcome.sh ~/.bashrc || echo "/etc/profile.d/welcome.sh" >> ~/.bashrc
 
 echo "✅ 安装完成 🎉"
