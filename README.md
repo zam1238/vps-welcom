@@ -1,17 +1,24 @@
 # 🌐 VPS Welcome Panel
 ## 🚀 一键安装
 
-```bash
+Alpine 一键版
+```apk add bash >/dev/null 2>&1 && \
 curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && \
 chmod 755 /etc/profile.d/welcome.sh && \
-> /etc/motd 2>/dev/null && \
-[ -d /etc/update-motd.d ] && chmod -x /etc/update-motd.d/* && \
-[ -f /etc/pam.d/sshd ] && sed -i '/pam_motd.so/d' /etc/pam.d/sshd 2>/dev/null && \
+grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bash /etc/profile.d/welcome.sh' >> /etc/profile
+
+```
+
+Debian 一键版
+```curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && \
+chmod 755 /etc/profile.d/welcome.sh && \
+> /etc/motd && \
+chmod -x /etc/update-motd.d/* 2>/dev/null && \
+sed -i '/pam_motd.so/d' /etc/pam.d/sshd 2>/dev/null && \
 ( grep -q welcome.sh /etc/profile || echo "bash /etc/profile.d/welcome.sh" >> /etc/profile ) && \
 ( grep -q welcome.sh ~/.bashrc || echo "bash /etc/profile.d/welcome.sh" >> ~/.bashrc )
 
 ```
-
 ##  卸载
 ```sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
 ```
