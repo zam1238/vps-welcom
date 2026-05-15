@@ -1,16 +1,21 @@
-#!/bin/bash
-# 路径：/etc/profile.d/welcome.sh
-# 授权：chmod +x /etc/profile.d/welcome.sh
+#!/usr/bin/env bash
 
+# 路径: /etc/profile.d/welcome.sh
+# 授权: chmod +x /etc/profile.d/welcome.sh
+
+# 只在 bash 执行
+[ -n "$BASH_VERSION" ] || return
+
+# 只在交互终端显示
 [ -z "$PS1" ] && return
 
 export TERM=xterm-256color
 
-G="\033[1;32m"
-C="\033[1;36m"
-Y="\033[1;33m"
-R="\033[1;31m"
-N="\033[0m"
+G=$'\033[1;32m'
+C=$'\033[1;36m'
+Y=$'\033[1;33m'
+R=$'\033[1;31m'
+N=$'\033[0m'
 
 clear
 
