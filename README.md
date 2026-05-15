@@ -3,7 +3,7 @@
 
 Alpine 一键版
 ```apk add bash >/dev/null 2>&1 && \
-curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && \
+curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome1.sh -o /etc/profile.d/welcome.sh && \
 chmod 755 /etc/profile.d/welcome.sh && \
 grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bash /etc/profile.d/welcome.sh' >> /etc/profile
 
