@@ -18,7 +18,7 @@ sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome1.sh
 ## Debian 一键版
 
 ```
-curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && chmod 755 /etc/profile.d/welcome.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/install.sh)
 ```
 
 ##  Debian卸载
