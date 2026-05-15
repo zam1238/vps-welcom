@@ -6,11 +6,6 @@
 bash <(curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/install1.sh)
 ```
 
-##  Alpine卸载
-
-```
-sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome1.sh
-```
 
 ## Debian 一键版
 
@@ -18,10 +13,10 @@ sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome1.sh
 bash <(curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/install.sh)
 ```
 
-##  Debian卸载
+##  卸载
 
 ```
-sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/uninstall.sh)
 ```
 
 一个轻量级 SSH 登录欢迎面板，支持：
@@ -31,8 +26,6 @@ sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
 - 📡 网络线路识别（CN2 / 4837 / 9929）
 - 🌍 回程路径分析
 - 📶 延迟 / Google 测速
-- 🎬 流媒体解锁检测（Netflix / Disney+ / TikTok）
-- 🤖 ChatGPT API 可用性检测
 - 🐳 Docker 容器状态
 
 适用于多服务器统一部署。
