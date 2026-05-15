@@ -17,7 +17,9 @@ curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o
 
 ##  卸载
 
-```sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh```
+```
+sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
+```
 
 一个轻量级 SSH 登录欢迎面板，支持：
 
