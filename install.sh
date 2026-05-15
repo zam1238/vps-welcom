@@ -1,30 +1,53 @@
 #!/usr/bin/env bash
 
-echo "🧹 开始彻底清理旧欢迎脚本..."
+echo "🧹 正在清理所有旧欢迎脚本..."
 
-# ===== 1. 清理 profile / bashrc 里的调用 =====
+# ===== 1. 清 shell 层 =====
 sed -i '/welcome.sh/d' /etc/profile 2>/dev/null
 sed -i '/welcome.sh/d' ~/.bashrc 2>/dev/null
+sed -i '/welcome.sh/d' ~/.profile 2>/dev/null
 
 sed -i '/oci/d' /etc/profile 2>/dev/null
 sed -i '/helper/d' /etc/profile 2>/dev/null
 sed -i '/oci/d' ~/.bashrc 2>/dev/null
 sed -i '/helper/d' ~/.bashrc 2>/dev/null
+sed -i '/oci/d' ~/.profile 2>/dev/null
+sed -i '/helper/d' ~/.profile 2>/dev/null
 
-# ===== 2. 删除所有旧脚本 =====
+# ===== 2. 清 profile.d =====
 rm -f /etc/profile.d/welcome.sh \
       /etc/profile.d/*oci* \
       /etc/profile.d/*helper* \
-      /etc/profile.d/*login* 2>/dev/null
+      2>/dev/null
+
+# ===== 3. 清 MOTD =====
+chmod -x /etc/update-motd.d/* 2>/dev/null
+rm -f /etc/update-motd.d/*oci* /etc/update-motd.d/*helper* 2>/dev/null
+
+# ===== 4. 清 PAM =====
+sed -i '/pam_motd.so/d' /etc/pam.d/sshd 2>/dev/null
+sed -i '/oci/d' /etc/pam.d/sshd 2>/dev/null
+sed -i '/helper/d' /etc/pam.d/sshd 2>/dev/null
+
+# ===== 5. 清 SSH Banner =====
+> /etc/issue 2>/dev/null
+> /etc/issue.net 2>/dev/null
+
+sed -i '/Banner/d' /etc/ssh/sshd_config 2>/dev/null
+echo "Banner none" >> /etc/ssh/sshd_config
+
+# ===== 6. 清 cloud-init（OCI 最坑的地方）=====
+rm -rf /var/lib/cloud/instance/scripts/* 2>/dev/null
+rm -rf /var/lib/cloud/scripts/per-*/* 2>/dev/null
+touch /etc/cloud/cloud-init.disabled
 
 echo "✅ 清理完成"
 
-# ===== 3. 下载你的 welcome =====
-echo "📦 下载新欢迎面板..."
+# ===== 7. 下载你的 welcome =====
+echo "📦 安装你的欢迎面板..."
 
 curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh
 
-# 检测下载
 if [ ! -f /etc/profile.d/welcome.sh ]; then
     echo "❌ welcome.sh 下载失败"
     exit 1
@@ -32,12 +55,8 @@ fi
 
 chmod 755 /etc/profile.d/welcome.sh
 
-echo "✅ 安装完成"
+# ===== 8. 关键：只保留 profile.d 自动加载（不写 profile / bashrc）=====
 
-# ===== 4. 设置唯一执行入口（核心）=====
-echo "🔧 设置启动入口..."
-
-echo 'source /etc/profile.d/welcome.sh' >> /etc/profile
-
-echo "✅ 完成 🎉"
+echo "✅ 安装完成 🎉"
 echo "👉 请重新登录 SSH 查看效果"
+``
