@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # 路径: /etc/profile.d/welcome.sh
 # 授权: chmod +x /etc/profile.d/welcome.sh
-# 如果不是 bash，直接退出（防止 sh 报错）
-[ -n "$BASH_VERSION" ] || return 0
+# 如果不是 bash，自动重新用 bash 执行
+if [ -z "$BASH_VERSION" ]; then
+    exec bash "$0"
+fi
 
-# 只在交互终端执行
+# 只在交互终端
 [ -z "$PS1" ] && return
 
 export TERM=xterm-256color
