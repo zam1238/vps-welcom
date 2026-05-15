@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # 路径: /etc/profile.d/welcome.sh
 # 授权: chmod +x /etc/profile.d/welcome.sh
-# 只在交互终端显示
+# 如果不是 bash，直接退出（防止 sh 报错）
 [ -n "$BASH_VERSION" ] || return 0
 
-#颜色
+# 只在交互终端执行
+[ -z "$PS1" ] && return
+
 export TERM=xterm-256color
 
 G=$'\033[1;32m'
@@ -14,7 +16,6 @@ R=$'\033[1;31m'
 N=$'\033[0m'
 
 clear
-
 
 # ===== ICMP延迟检测 =====
 detect_ping() {
