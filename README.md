@@ -3,7 +3,7 @@
 
 ```bash
 curl -L https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && chmod 755 /etc/profile.d/welcome.sh && > /etc/motd && chmod -x /etc/update-motd.d/* && sed -i '/pam_motd.so/d' /etc/pam.d/sshd
-
+```
 一个轻量级 SSH 登录欢迎面板，支持：
 
 - 🌍 中文地区自动识别（带国旗）
