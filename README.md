@@ -10,13 +10,7 @@ grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bas
 ```
 
 Debian 一键版
-```curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && \
-chmod 755 /etc/profile.d/welcome.sh && \
-> /etc/motd 2>/dev/null && \
-chmod -x /etc/update-motd.d/* 2>/dev/null && \
-sed -i '/pam_motd.so/d' /etc/pam.d/sshd 2>/dev/null && \
-( grep -q welcome.sh /etc/profile || echo "bash /etc/profile.d/welcome.sh" >> /etc/profile ) && \
-( grep -q welcome.sh ~/.bashrc || echo "bash /etc/profile.d/welcome.sh" >> ~/.bashrc )
+```curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && chmod 755 /etc/profile.d/welcome.sh
 ```
 ##  卸载
 ```sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
