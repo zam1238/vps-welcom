@@ -4,6 +4,10 @@
 
 [ -z "$PS1" ] && exit 0
 
+# ✅ 防重复执行
+[ -n "$ZAM_WELCOME_LOCK" ] && return
+export ZAM_WELCOME_LOCK=1
+
 export TERM=xterm-256color
 
 G="\033[1;32m"
