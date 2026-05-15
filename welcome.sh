@@ -256,76 +256,6 @@ else
     RISK="${Y}🟡一般${N}"
 fi
 
-# ===== 流媒体 & AI 检测（终极版） =====
-
-# ===== YouTube =====
-YT=$(curl -s --max-time 2 https://www.youtube.com | grep -q "youtube" && echo 1 || echo 0)
-[ "$YT" = "1" ] && YT_ICON="${G}✅${N}" || YT_ICON="${R}❌${N}"
-
-# ===== Netflix（地区 + 解锁类型） =====
-NF_PAGE=$(curl -s --max-time 3 https://www.netflix.com/title/80018499 -H "Accept-Language: en")
-
-NF_REGION=$(echo "$NF_PAGE" | grep -o 'preferredLocale":"[a-zA-Z-]*' | cut -d'"' -f3)
-
-if echo "$NF_PAGE" | grep -q "Not Available"; then
-    NF_RESULT="${R}❌ 不支持${N}"
-elif [ -n "$NF_REGION" ]; then
-    if echo "$NF_PAGE" | grep -q "is not available"; then
-        NF_RESULT="${Y}🟡 仅自制 (${NF_REGION})${N}"
-    else
-        NF_RESULT="${G}✅ 完整解锁 (${NF_REGION})${N}"
-    fi
-else
-    NF_RESULT="${R}❌ 不可用${N}"
-fi
-
-# ===== ChatGPT（API检测✅）=====
-GPT_STATUS=$(curl -s --max-time 3 https://api.openai.com/v1/models)
-
-echo "$GPT_STATUS" | grep -q "error" && GPT_ICON="${R}❌${N}" || GPT_ICON="${G}✅${N}"
-
-# ===== Disney+ =====
-DISNEY_REGION=$(curl -s --max-time 3 https://www.disneyplus.com/ | grep -o 'region=[a-zA-Z]*' | cut -d'=' -f2)
-
-if [ -n "$DISNEY_REGION" ]; then
-    DISNEY_RESULT="${G}✅ ${DISNEY_REGION}${N}"
-else
-    DISNEY_RESULT="${R}❌${N}"
-fi
-
-# ===== TikTok =====
-TIKTOK_REGION=$(curl -s --max-time 3 https://www.tiktok.com/ | grep -o '"region":"[A-Z]*"' | head -1 | cut -d'"' -f4)
-
-if [ -n "$TIKTOK_REGION" ]; then
-    TIKTOK_RESULT="${G}✅ ${TIKTOK_REGION}${N}"
-else
-    TIKTOK_RESULT="${R}❌${N}"
-fi
-
-
-# ===== Docker =====
-DOCKER_LIST=$(docker ps -a --format "{{.Names}} {{.State}}" 2>/dev/null)
-
-DOCKER_STATUS=""
-COUNT=0
-
-while read -r name state
-do
-    [ -z "$name" ] && continue
-
-    if [ "$state" = "running" ]; then
-        STATUS="${G}🟢${N}"
-    else
-        STATUS="${R}🔴${N}"
-    fi
-
-    DOCKER_STATUS="$DOCKER_STATUS$name $STATUS  "
-
-    COUNT=$((COUNT+1))
-    [ $COUNT -ge 4 ] && break
-
-done <<< "$DOCKER_LIST"
-
 # ===== 输出 =====
 # 🔐 SSH:28820 │ 🔐 端口范围:28820 手改以免小鸡端口记不住范围
 
@@ -348,9 +278,6 @@ echo -e "🌐 Google访问: ${Y}${GOOGLE_MS}ms${N}"
 echo -e "${C}────────── 质量评估 ──────────${N}"
 echo -e "📡 状态: v4 $V4_STATUS │ v6 $V6_STATUS │ 📊 评分: v4=$SCORE_V4 │ v6=$SCORE_V6 │ ★综合:$FINAL"
 echo -e "🧠 风控: $RISK │ 🛡️ 网络: 正常 ✅"
-
-echo -e "${C}────────── 解锁情况 ──────────${N}"
-echo -e "🎬 解锁情况:油管 $YT_ICON │ 奈飞 $NF_RESULT │ Disney+ $DISNEY_RESULT │ TikTok $TIKTOK_RESULT │ ChatGPT $GPT_ICON │ Google ✅"
 
 echo -e "${C}────────── 系统服务 ──────────${N}"
 echo -e "🐳 DOCKER容器: $DOCKER_STATUS"
