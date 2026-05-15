@@ -11,8 +11,8 @@ grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bas
 
 Debian 一键版
 ```curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && chmod 755 /etc/profile.d/welcome.sh
-
 ```
+
 ##  卸载
 ```sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
 ```
