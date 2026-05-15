@@ -19,9 +19,9 @@ echo "✅ 清理完成"
 # ===== 7. 安装 welcome =====
 echo "📦 安装你的欢迎面板..."
 
-curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh
+curl -L https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh
 
-if [ ! -f /etc/profile.d/welcome.sh ]; then
+if [ ! -s /etc/profile.d/welcome.sh ]; then
     echo "❌ welcome.sh 下载失败"
     exit 1
 fi
