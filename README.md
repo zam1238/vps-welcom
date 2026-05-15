@@ -16,3 +16,7 @@ curl -L https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o 
 - 🐳 Docker 容器状态
 
 适用于多服务器统一部署。
+
+修改welcome.sh 里面输出对应的文字 比如zam-甲骨文可以改成大聪明 自己看着舒服点
+文件路径/etc/profile.d/welcome.sh 也可以在上面改
+全程AI写的 我自己用的方便
