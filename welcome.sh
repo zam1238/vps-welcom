@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
-
 # 路径: /etc/profile.d/welcome.sh
 # 授权: chmod +x /etc/profile.d/welcome.sh
-
-# 只在 bash 执行
-[ -n "$BASH_VERSION" ] || return
-
 # 只在交互终端显示
 [ -z "$PS1" ] && return
 
@@ -18,6 +13,7 @@ R=$'\033[1;31m'
 N=$'\033[0m'
 
 clear
+
 
 # ===== ICMP延迟检测 =====
 detect_ping() {
