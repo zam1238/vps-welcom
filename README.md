@@ -1,12 +1,18 @@
 # 🌐 VPS Welcome Panel
 ## 🚀 一键安装
 
-Alpine 一键版
+##  Alpine 一键版
 ```apk add bash >/dev/null 2>&1 && \
 curl -fsSL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome1.sh -o /etc/profile.d/welcome.sh && \
 chmod 755 /etc/profile.d/welcome.sh && \
 grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bash /etc/profile.d/welcome.sh' >> /etc/profile
 
+```
+
+##  Alpine卸载
+
+```
+sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome1.sh
 ```
 
 ## Debian 一键版
@@ -15,7 +21,7 @@ grep -q welcome.sh /etc/profile || echo '[ -x /etc/profile.d/welcome.sh ] && bas
 curl -sL https://raw.githubusercontent.com/zam1238/vps-welcom/main/welcome.sh -o /etc/profile.d/welcome.sh && chmod 755 /etc/profile.d/welcome.sh
 ```
 
-##  卸载
+##  Debian卸载
 
 ```
 sed -i '/welcome.sh/d' /etc/profile && rm -f /etc/profile.d/welcome.sh
