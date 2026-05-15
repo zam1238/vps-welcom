@@ -2,7 +2,7 @@
 # 路径：/etc/profile.d/welcome.sh
 # 授权：chmod +x /etc/profile.d/welcome.sh
 
-[ -z "$PS1" ] && return
+[ -z "$PS1" ] && exit 0
 
 export TERM=xterm-256color
 
